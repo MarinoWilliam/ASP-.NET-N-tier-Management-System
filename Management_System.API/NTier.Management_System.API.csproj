@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\NTier.ManagementSystem.Data\NTier.ManagementSystem.Data.csproj" />
     <ProjectReference Include="..\NTier.ManagementSystem.Domain\NTier.ManagementSystem.Domain.csproj" />
+    <ProjectReference Include="..\NTier.ManagementSystem.Service\NTier.ManagementSystem.Service.csproj" />
   </ItemGroup>
 
 </Project>

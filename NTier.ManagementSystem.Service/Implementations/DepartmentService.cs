@@ -1,4 +1,5 @@
-﻿using NTier.ManagementSystem.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using NTier.ManagementSystem.Data;
 using NTier.ManagementSystem.Domain.Entities;
 using NTier.ManagementSystem.Service.Interfaces;
 using System;
@@ -12,36 +13,48 @@ namespace NTier.ManagementSystem.Service.Implementations
     internal class DepartmentService : IDepartmentService
     {
         private readonly ManagementDbContext _managementDbContext;
-        private readonly IDepartmentService _departmentService;
 
-        public DepartmentService (ManagementDbContext managementDbContext, IDepartmentService departmentService)
+        public DepartmentService (ManagementDbContext managementDbContext)
         {
             _managementDbContext = managementDbContext;
-            _departmentService = departmentService;
         }
-        public Task<Department> AddDepartmentAsync(Department department)
+        public async Task<Department> AddDepartmentAsync(Department department)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> DeleteDepartmentByIdAsync(int id)
-        {
-            throw new NotImplementedException();
+            _managementDbContext.Departments.Add(department);
+            await _managementDbContext.SaveChangesAsync();
+            return department;
         }
 
-        public Task<IEnumerable<Department>> GetAllDepartmentsAsync()
+        public async Task<bool> DeleteDepartmentByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var department = await _managementDbContext.Departments.FindAsync(id);
+            if (department == null) return false;
+
+            _managementDbContext.Departments.Remove(department);
+            await _managementDbContext.SaveChangesAsync();
+            return true;
         }
 
-        public Task<Department?> GetDepartmentByIdAsync(int id)
+        public async Task<IEnumerable<Department>> GetAllDepartmentsAsync()
         {
-            throw new NotImplementedException();
+            return await _managementDbContext.Departments.AsNoTracking().ToListAsync();
         }
 
-        public Task<Department?> UpdateDepartmentAsync(Department department)
+        public async Task<Department?> GetDepartmentByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _managementDbContext.Departments.FindAsync(id);
+        }
+
+        public async Task<Department?> UpdateDepartmentAsync(Department department)
+        {
+            var existing = await _managementDbContext.Departments.FindAsync(department.Id);
+            if (existing == null) return null;
+
+            existing.Name = department.Name;
+            existing.Description = department.Description;
+
+            await _managementDbContext.SaveChangesAsync();
+            return existing;
         }
     }
 }

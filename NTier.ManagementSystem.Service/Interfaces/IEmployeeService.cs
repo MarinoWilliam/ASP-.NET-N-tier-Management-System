@@ -22,7 +22,7 @@ namespace NTier.ManagementSystem.Service.Interfaces
             decimal? annualSalary = null,
             string? contractAgency = null,
             decimal? hourlyRate = null);
-        Task<Employee?> UpdateEmployeeAsync(Employee employee);
+        Task<Employee?> UpdateEmployeeAsync(int id, Employee employee);
         Task<bool> DeleteEmployeeByIdAsync(int id);
     }
 }

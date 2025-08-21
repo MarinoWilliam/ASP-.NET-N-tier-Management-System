@@ -58,9 +58,9 @@ namespace NTier.ManagementSystem.Service.Implementations
             return employee;
         }
 
-        public async Task<Employee?> UpdateEmployeeAsync(Employee employee)
+        public async Task<Employee?> UpdateEmployeeAsync(int id, Employee employee)
         {
-            var currentEmployee = await _managementDbContext.Employees.FindAsync(employee.Id);
+            var currentEmployee = await _managementDbContext.Employees.FindAsync(id);
             if (currentEmployee == null) return null;
 
             var updated = SimpleEmployeeFactory.UpdateEmployee(currentEmployee, employee);

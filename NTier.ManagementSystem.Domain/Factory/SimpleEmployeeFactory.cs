@@ -55,21 +55,22 @@ namespace NTier.ManagementSystem.Domain.Factory
 
         public static Employee UpdateEmployee(Employee target, Employee source)
         {
-            target.FirstName = source.FirstName;
-            target.LastName = source.LastName;
-            target.Email = source.Email;
-            target.DepartmentId = source.DepartmentId;
-            target.TeamId = source.TeamId;
+            if (source.FirstName != null) target.FirstName = source.FirstName;
+            if (source.LastName != null) target.LastName = source.LastName;
+            if (source.Email != null) target.Email = source.Email;
+            if (source.DepartmentId.HasValue) target.DepartmentId = source.DepartmentId.Value;
+            if (source.TeamId.HasValue) target.TeamId = source.TeamId.Value;
+
 
             switch (target)
             {
                 case FullTimeEmployee t when source is FullTimeEmployee s:
-                    t.AnnualSalary = s.AnnualSalary;
+                    if (s.AnnualSalary != 0) t.AnnualSalary = s.AnnualSalary;
                     break;
 
                 case FreelancerEmployee t when source is FreelancerEmployee s:
-                    t.ContractAgency = s.ContractAgency;
-                    t.HourlyRate = s.HourlyRate;
+                    if (s.ContractAgency != null) t.ContractAgency = s.ContractAgency;
+                    if (s.HourlyRate != 0) t.HourlyRate = s.HourlyRate;
                     break;
 
                 default:

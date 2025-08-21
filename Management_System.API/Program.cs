@@ -11,6 +11,8 @@ builder.Services.AddDbContext<ManagementDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+builder.Services.AddScoped<ITeamService, TeamService>();
 
 
 builder.Services.AddControllers();

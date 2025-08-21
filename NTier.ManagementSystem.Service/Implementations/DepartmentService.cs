@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace NTier.ManagementSystem.Service.Implementations
 {
-    internal class DepartmentService : IDepartmentService
+    public class DepartmentService : IDepartmentService
     {
         private readonly ManagementDbContext _managementDbContext;
 

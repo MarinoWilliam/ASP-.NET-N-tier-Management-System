@@ -63,11 +63,16 @@ namespace NTier.ManagementSystem.Data.Factory
                 case EmployeeType.FullTime:
                     if (!dto.AnnualSalary.HasValue)
                         throw new ArgumentException("AnnualSalary is required for full-time employees.");
+                    dto.ContractAgency = null;
+                    dto.HourlyRate = null;
                     break;
+
                 case EmployeeType.Freelancer:
                     if (string.IsNullOrEmpty(dto.ContractAgency) || !dto.HourlyRate.HasValue)
                         throw new ArgumentException("ContractAgency and HourlyRate are required for freelancers.");
+                    dto.AnnualSalary = null;
                     break;
+
                 default:
                     throw new NotSupportedException($"Employee type '{dto.Type}' is not supported.");
             }
@@ -78,53 +83,54 @@ namespace NTier.ManagementSystem.Data.Factory
             target.DepartmentId = dto.DepartmentId;
             target.TeamId = dto.TeamId;
 
-            if (target.EmployeeType != dto.Type)
+            if (target.EmployeeType == dto.Type)
             {
-                target.EmployeeType = dto.Type;
-
-                if (dto.Type == EmployeeType.FullTime)
+                switch (target)
                 {
-                    if (target is FreelancerEmployee)
-                    {
-                        // For TPH, we need to ensure the database columns will be set to NULL
-                        target.GetType().GetProperty("ContractAgency")?.SetValue(target, null);
-                        target.GetType().GetProperty("HourlyRate")?.SetValue(target, null);
-                    }
+                    case FullTimeEmployee fullTime:
+                        fullTime.AnnualSalary = dto.AnnualSalary!.Value;
+                        break;
 
-                    // Set FullTime properties
-                    target.GetType().GetProperty("AnnualSalary")?.SetValue(target, dto.AnnualSalary);
+                    case FreelancerEmployee freelancer:
+                        freelancer.ContractAgency = dto.ContractAgency!;
+                        freelancer.HourlyRate = dto.HourlyRate!.Value;
+                        break;
                 }
-                else if (dto.Type == EmployeeType.Freelancer)
-                {
-                    // If changing to Freelancer, ensure FullTime properties are null
-                    if (target is FullTimeEmployee)
-                    {
-                        target.GetType().GetProperty("AnnualSalary")?.SetValue(target, null);
-                        target.GetType().GetProperty("KPI")?.SetValue(target, null);
-                    }
 
-                    // Set Freelancer properties
-                    target.GetType().GetProperty("ContractAgency")?.SetValue(target, dto.ContractAgency);
-                    target.GetType().GetProperty("HourlyRate")?.SetValue(target, dto.HourlyRate);
-                }
+                return target;
+            }
+
+            target.EmployeeType = dto.Type;
+
+            if (dto.Type == EmployeeType.FullTime)
+            {
+                var fullTime = target as FullTimeEmployee
+                               ?? new FullTimeEmployee { Id = target.Id };
+                fullTime.FirstName = dto.FirstName;
+                fullTime.LastName = dto.LastName;
+                fullTime.Email = dto.Email;
+                fullTime.DepartmentId = dto.DepartmentId;
+                fullTime.TeamId = dto.TeamId;
+                fullTime.EmployeeType = EmployeeType.FullTime;
+                fullTime.AnnualSalary = dto.AnnualSalary!.Value;
+                fullTime.KPI = 100;
+                return fullTime;
             }
             else
             {
-                // Same type, just update the properties
-                if (target is FullTimeEmployee fullTime && dto.AnnualSalary.HasValue)
-                {
-                    fullTime.AnnualSalary = dto.AnnualSalary.Value;
-                }
-                else if (target is FreelancerEmployee freelancer)
-                {
-                    if (!string.IsNullOrEmpty(dto.ContractAgency))
-                        freelancer.ContractAgency = dto.ContractAgency;
-                    if (dto.HourlyRate.HasValue)
-                        freelancer.HourlyRate = dto.HourlyRate.Value;
-                }
+                var freelancer = target as FreelancerEmployee
+                                 ?? new FreelancerEmployee { Id = target.Id };
+                freelancer.FirstName = dto.FirstName;
+                freelancer.LastName = dto.LastName;
+                freelancer.Email = dto.Email;
+                freelancer.DepartmentId = dto.DepartmentId;
+                freelancer.TeamId = dto.TeamId;
+                freelancer.EmployeeType = EmployeeType.Freelancer;
+                freelancer.ContractAgency = dto.ContractAgency!;
+                freelancer.HourlyRate = dto.HourlyRate!.Value;
+                return freelancer;
             }
-
-            return target;
         }
+
     }
 }

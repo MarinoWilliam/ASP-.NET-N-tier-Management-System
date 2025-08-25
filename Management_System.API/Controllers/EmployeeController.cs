@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using NTier.Management_System.API.DTO.EmployeeDTO;
-using NTier.ManagementSystem.Domain.Entities;
+using NTier.ManagementSystem.Data.DTO.EmployeeDTO;
+using NTier.ManagementSystem.Data.Entities;
+using NTier.ManagementSystem.Service.Implementations;
 using NTier.ManagementSystem.Service.Interfaces;
 
 namespace NTier.Management_System.API.Controllers
@@ -47,11 +48,11 @@ namespace NTier.Management_System.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Employee employee)
+        public async Task<IActionResult> Update(int id, UpdateEmployeeDto employeeDto)
         {
             try
             {
-                var updatedEmployee = await _employeeService.UpdateEmployeeAsync(id, employee);
+                var updatedEmployee = await _employeeService.UpdateEmployeeAsync(id, employeeDto);
                 if (updatedEmployee == null) return NotFound();
                 return Ok(updatedEmployee);
             }
@@ -84,6 +85,23 @@ namespace NTier.Management_System.API.Controllers
                 );
 
                 return CreatedAtAction(nameof(Get), new { id = employee.Id }, employee);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error: " + ex.Message);
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var success = await _employeeService.DeleteEmployeeByIdAsync(id);
+                if (!success)
+                    return NotFound();
+
+                return NoContent();
             }
             catch (Exception ex)
             {

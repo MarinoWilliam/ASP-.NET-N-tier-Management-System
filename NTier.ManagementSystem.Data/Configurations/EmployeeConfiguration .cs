@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using NTier.ManagementSystem.Domain.Entities;
+using NTier.ManagementSystem.Data.Common.Enums;
+using NTier.ManagementSystem.Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,10 @@ namespace NTier.ManagementSystem.Data.Configurations
         {
             builder.ToTable("Employees");
             builder.HasKey(e => e.Id);
+
+            builder.HasDiscriminator(e => e.EmployeeType)
+                   .HasValue<FullTimeEmployee>(EmployeeType.FullTime)
+                   .HasValue<FreelancerEmployee>(EmployeeType.Freelancer);
 
             builder.Property(e => e.FirstName)
                    .HasMaxLength(100)

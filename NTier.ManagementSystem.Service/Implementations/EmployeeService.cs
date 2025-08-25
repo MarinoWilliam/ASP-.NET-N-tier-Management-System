@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NTier.ManagementSystem.Data;
-using NTier.ManagementSystem.Domain.Common.Enums;
-using NTier.ManagementSystem.Domain.Entities;
-using NTier.ManagementSystem.Domain.Factory;
+using NTier.ManagementSystem.Data.Common.Enums;
+using NTier.ManagementSystem.Data.DTO.EmployeeDTO;
+using NTier.ManagementSystem.Data.Entities;
+using NTier.ManagementSystem.Data.Factory;
 using NTier.ManagementSystem.Service.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -20,15 +21,90 @@ namespace NTier.ManagementSystem.Service.Implementations
             _managementDbContext = context;
         }
 
-        public async Task<IEnumerable<Employee>> GetAllEmpoyeesAsync()
+        public async Task<IEnumerable<RetrunEmployeeDto>> GetAllEmpoyeesAsync()
         {
-            return await _managementDbContext.Employees.AsNoTracking().ToListAsync();
+            return await _managementDbContext.Employees
+                .AsNoTracking()
+                .Include(e => e.Department)
+                .Include(e => e.Team)
+                .Select(e => new RetrunEmployeeDto
+                {
+                    Id = e.Id,
+                    FirstName = e.FirstName,
+                    LastName = e.LastName,
+                    Type = e.EmployeeType,
+                    Email = e.Email,
+                    DepartmentId = e.DepartmentId,
+                    DepartmentName = e.Department != null ? e.Department.Name : null,
+                    TeamId = e.TeamId,
+                    TeamName = e.Team != null ? e.Team.Name : null,
+                })
+                .ToListAsync();
         }
 
-        public async Task<Employee?> GetEmployeeByIdAsync(int id)
+        public async Task<RetrunEmployeeDto?> GetEmployeeByIdAsync(int id)
         {
-            return await _managementDbContext.Employees.FindAsync(id);
+            // First, get the type to decide which subclass to query
+            var baseEmployee = await _managementDbContext.Employees
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == id);
+
+            if (baseEmployee == null) return null;
+
+            if (baseEmployee.EmployeeType == EmployeeType.FullTime)
+            {
+                var employee = await _managementDbContext.Employees
+                    .OfType<FullTimeEmployee>()
+                      .AsNoTracking()
+                .Include(e => e.Department)
+                .Include(e => e.Team)
+                    .FirstOrDefaultAsync(e => e.Id == id);
+
+                if (employee == null) return null;
+
+                return new RetrunFullTimeEmployeeDto
+                {
+                    Id = employee.Id,
+                    FirstName = employee.FirstName,
+                    LastName = employee.LastName,
+                    Type = employee.EmployeeType,
+                    Email = employee.Email,
+                    DepartmentId = employee.DepartmentId,
+                    DepartmentName = employee.Department?.Name,
+                    TeamId = employee.TeamId,
+                    TeamName = employee.Team?.Name,
+                    AnnualSalary = employee.AnnualSalary,
+                    KPI = employee.KPI ?? 0
+                };
+            }
+            else
+            {
+                var employee = await _managementDbContext.Employees
+                    .OfType<FreelancerEmployee>()
+                      .AsNoTracking()
+                .Include(e => e.Department)
+                .Include(e => e.Team)
+                    .FirstOrDefaultAsync(e => e.Id == id);
+
+                if (employee == null) return null;
+
+                return new RetrunFreeLancerEmployeeDto
+                {
+                    Id = employee.Id,
+                    FirstName = employee.FirstName,
+                    LastName = employee.LastName,
+                    Type = employee.EmployeeType,
+                    Email = employee.Email,
+                    DepartmentId = employee.DepartmentId,
+                    DepartmentName = employee.Department?.Name,
+                    TeamId = employee.TeamId,
+                    TeamName = employee.Team?.Name,
+                    ContractAgency = employee.ContractAgency,
+                    HourlyRate = employee.HourlyRate
+                };
+            }
         }
+
 
         public async Task<Employee> AddEmployeeAsync(
             string firstName,
@@ -58,14 +134,13 @@ namespace NTier.ManagementSystem.Service.Implementations
             return employee;
         }
 
-        public async Task<Employee?> UpdateEmployeeAsync(int id, Employee employee)
+        public async Task<Employee?> UpdateEmployeeAsync(int id, UpdateEmployeeDto employeeDto)
         {
             var currentEmployee = await _managementDbContext.Employees.FindAsync(id);
             if (currentEmployee == null) return null;
 
-            var updated = SimpleEmployeeFactory.UpdateEmployee(currentEmployee, employee);
+            var updated = SimpleEmployeeFactory.UpdateEmployee(currentEmployee, employeeDto);
             await _managementDbContext.SaveChangesAsync();
-
             return updated;
         }
 

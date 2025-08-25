@@ -19,8 +19,6 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\NTier.ManagementSystem.Domain\NTier.ManagementSystem.Domain.csproj" />
-  </ItemGroup>
+
 
 </Project>

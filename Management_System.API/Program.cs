@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using NTier.ManagementSystem.Data;
-using NTier.ManagementSystem.Domain.Factory;
+using NTier.ManagementSystem.Data.Factory;
 using NTier.ManagementSystem.Service.Implementations;
 using NTier.ManagementSystem.Service.Interfaces;
-
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,8 +15,44 @@ builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<ITeamService, TeamService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularDevClient",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:4200")
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
+});
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver
+        {
+            Modifiers =
+            {
+                ti =>
+                {
+                    if (ti.Type == typeof(NTier.ManagementSystem.Data.Entities.Employee))
+                    {
+                        ti.PolymorphismOptions = new JsonPolymorphismOptions
+                        {
+                            TypeDiscriminatorPropertyName = "$type",
+                            IgnoreUnrecognizedTypeDiscriminators = true,
+                            DerivedTypes =
+                            {
+                                new JsonDerivedType(typeof(NTier.ManagementSystem.Data.Entities.FullTimeEmployee), "fulltime"),
+                                new JsonDerivedType(typeof(NTier.ManagementSystem.Data.Entities.FreelancerEmployee), "freelancer")
+                            }
+                        };
+                    }
+                }
+            }
+        };
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -27,6 +64,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowAngularDevClient");
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();

@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NTier.ManagementSystem.Data\NTier.ManagementSystem.Data.csproj" />
-    <ProjectReference Include="..\NTier.ManagementSystem.Domain\NTier.ManagementSystem.Domain.csproj" />
   </ItemGroup>
 
 </Project>

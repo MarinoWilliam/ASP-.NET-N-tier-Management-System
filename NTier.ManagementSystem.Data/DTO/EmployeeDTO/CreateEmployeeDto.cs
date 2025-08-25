@@ -1,6 +1,11 @@
-﻿using NTier.ManagementSystem.Domain.Common.Enums;
+﻿using NTier.ManagementSystem.Data.Common.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace NTier.Management_System.API.DTO.EmployeeDTO
+namespace NTier.ManagementSystem.Data.DTO.EmployeeDTO
 {
     public class CreateEmployeeDto
     {

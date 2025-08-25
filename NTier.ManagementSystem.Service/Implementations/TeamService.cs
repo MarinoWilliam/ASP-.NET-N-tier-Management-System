@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NTier.ManagementSystem.Data;
-using NTier.ManagementSystem.Domain.Entities;
+using NTier.ManagementSystem.Data.Entities;
 using NTier.ManagementSystem.Service.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;

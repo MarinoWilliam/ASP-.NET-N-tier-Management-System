@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using NTier.ManagementSystem.Domain.Entities;
+using NTier.ManagementSystem.Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +13,6 @@ namespace NTier.ManagementSystem.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<FreelancerEmployee> builder) 
         {
-            builder.ToTable("FreelancerEmployees");
-
             builder.Property(e => e.ContractAgency)
                 .HasMaxLength(200)
                 .IsRequired();

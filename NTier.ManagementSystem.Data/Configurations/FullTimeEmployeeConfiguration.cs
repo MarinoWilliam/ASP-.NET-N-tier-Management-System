@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using NTier.ManagementSystem.Domain.Entities;
+using NTier.ManagementSystem.Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +13,12 @@ namespace NTier.ManagementSystem.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<FullTimeEmployee> builder )
         {
-            builder.ToTable("FullTimeEmployees");
-
             builder.Property(e => e.AnnualSalary)
                .HasColumnType("decimal(18,2)")
                .IsRequired();
+
+            builder.Property(e => e.KPI)
+                .IsRequired(false);
         }
 
     }

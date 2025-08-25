@@ -1,4 +1,4 @@
-﻿using NTier.ManagementSystem.Domain.Entities;
+﻿using NTier.ManagementSystem.Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

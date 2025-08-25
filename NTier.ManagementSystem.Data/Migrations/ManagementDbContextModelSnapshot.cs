@@ -22,7 +22,7 @@ namespace NTier.ManagementSystem.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("NTier.ManagementSystem.Domain.Entities.Department", b =>
+            modelBuilder.Entity("NTier.ManagementSystem.Data.Entities.Department", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -55,7 +55,7 @@ namespace NTier.ManagementSystem.Data.Migrations
                     b.ToTable("Departments", (string)null);
                 });
 
-            modelBuilder.Entity("NTier.ManagementSystem.Domain.Entities.Employee", b =>
+            modelBuilder.Entity("NTier.ManagementSystem.Data.Entities.Employee", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -72,6 +72,9 @@ namespace NTier.ManagementSystem.Data.Migrations
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<int>("EmployeeType")
+                        .HasColumnType("int");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -97,10 +100,12 @@ namespace NTier.ManagementSystem.Data.Migrations
 
                     b.ToTable("Employees", (string)null);
 
-                    b.UseTptMappingStrategy();
+                    b.HasDiscriminator<int>("EmployeeType");
+
+                    b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("NTier.ManagementSystem.Domain.Entities.Team", b =>
+            modelBuilder.Entity("NTier.ManagementSystem.Data.Entities.Team", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -138,9 +143,9 @@ namespace NTier.ManagementSystem.Data.Migrations
                     b.ToTable("Teams", (string)null);
                 });
 
-            modelBuilder.Entity("NTier.ManagementSystem.Domain.Entities.FreelancerEmployee", b =>
+            modelBuilder.Entity("NTier.ManagementSystem.Data.Entities.FreelancerEmployee", b =>
                 {
-                    b.HasBaseType("NTier.ManagementSystem.Domain.Entities.Employee");
+                    b.HasBaseType("NTier.ManagementSystem.Data.Entities.Employee");
 
                     b.Property<string>("ContractAgency")
                         .IsRequired()
@@ -150,22 +155,25 @@ namespace NTier.ManagementSystem.Data.Migrations
                     b.Property<decimal>("HourlyRate")
                         .HasColumnType("decimal(18,2)");
 
-                    b.ToTable("FreelancerEmployees", (string)null);
+                    b.HasDiscriminator().HasValue(2);
                 });
 
-            modelBuilder.Entity("NTier.ManagementSystem.Domain.Entities.FullTimeEmployee", b =>
+            modelBuilder.Entity("NTier.ManagementSystem.Data.Entities.FullTimeEmployee", b =>
                 {
-                    b.HasBaseType("NTier.ManagementSystem.Domain.Entities.Employee");
+                    b.HasBaseType("NTier.ManagementSystem.Data.Entities.Employee");
 
                     b.Property<decimal>("AnnualSalary")
                         .HasColumnType("decimal(18,2)");
 
-                    b.ToTable("FullTimeEmployees", (string)null);
+                    b.Property<int?>("KPI")
+                        .HasColumnType("int");
+
+                    b.HasDiscriminator().HasValue(1);
                 });
 
-            modelBuilder.Entity("NTier.ManagementSystem.Domain.Entities.Department", b =>
+            modelBuilder.Entity("NTier.ManagementSystem.Data.Entities.Department", b =>
                 {
-                    b.HasOne("NTier.ManagementSystem.Domain.Entities.Employee", "Manager")
+                    b.HasOne("NTier.ManagementSystem.Data.Entities.Employee", "Manager")
                         .WithMany()
                         .HasForeignKey("ManagerId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -173,14 +181,14 @@ namespace NTier.ManagementSystem.Data.Migrations
                     b.Navigation("Manager");
                 });
 
-            modelBuilder.Entity("NTier.ManagementSystem.Domain.Entities.Employee", b =>
+            modelBuilder.Entity("NTier.ManagementSystem.Data.Entities.Employee", b =>
                 {
-                    b.HasOne("NTier.ManagementSystem.Domain.Entities.Department", "Department")
+                    b.HasOne("NTier.ManagementSystem.Data.Entities.Department", "Department")
                         .WithMany("Employees")
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("NTier.ManagementSystem.Domain.Entities.Team", "Team")
+                    b.HasOne("NTier.ManagementSystem.Data.Entities.Team", "Team")
                         .WithMany("Employees")
                         .HasForeignKey("TeamId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -190,15 +198,15 @@ namespace NTier.ManagementSystem.Data.Migrations
                     b.Navigation("Team");
                 });
 
-            modelBuilder.Entity("NTier.ManagementSystem.Domain.Entities.Team", b =>
+            modelBuilder.Entity("NTier.ManagementSystem.Data.Entities.Team", b =>
                 {
-                    b.HasOne("NTier.ManagementSystem.Domain.Entities.Department", "Department")
+                    b.HasOne("NTier.ManagementSystem.Data.Entities.Department", "Department")
                         .WithMany("Teams")
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NTier.ManagementSystem.Domain.Entities.Employee", "Leader")
+                    b.HasOne("NTier.ManagementSystem.Data.Entities.Employee", "Leader")
                         .WithMany()
                         .HasForeignKey("LeaderId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -208,32 +216,14 @@ namespace NTier.ManagementSystem.Data.Migrations
                     b.Navigation("Leader");
                 });
 
-            modelBuilder.Entity("NTier.ManagementSystem.Domain.Entities.FreelancerEmployee", b =>
-                {
-                    b.HasOne("NTier.ManagementSystem.Domain.Entities.Employee", null)
-                        .WithOne()
-                        .HasForeignKey("NTier.ManagementSystem.Domain.Entities.FreelancerEmployee", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("NTier.ManagementSystem.Domain.Entities.FullTimeEmployee", b =>
-                {
-                    b.HasOne("NTier.ManagementSystem.Domain.Entities.Employee", null)
-                        .WithOne()
-                        .HasForeignKey("NTier.ManagementSystem.Domain.Entities.FullTimeEmployee", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("NTier.ManagementSystem.Domain.Entities.Department", b =>
+            modelBuilder.Entity("NTier.ManagementSystem.Data.Entities.Department", b =>
                 {
                     b.Navigation("Employees");
 
                     b.Navigation("Teams");
                 });
 
-            modelBuilder.Entity("NTier.ManagementSystem.Domain.Entities.Team", b =>
+            modelBuilder.Entity("NTier.ManagementSystem.Data.Entities.Team", b =>
                 {
                     b.Navigation("Employees");
                 });

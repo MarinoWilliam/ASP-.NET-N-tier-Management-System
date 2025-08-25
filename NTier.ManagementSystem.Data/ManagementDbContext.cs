@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using NTier.ManagementSystem.Domain.Common;
-using NTier.ManagementSystem.Domain.Entities;
+using NTier.ManagementSystem.Data.Common;
+using NTier.ManagementSystem.Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,15 +17,13 @@ namespace NTier.ManagementSystem.Data
         }
 
         public DbSet<Employee> Employees => Set<Employee>();
-        public DbSet<FreelancerEmployee> FreelancerEmployee => Set<FreelancerEmployee>();
-        public DbSet<FullTimeEmployee> FullTimeEmployee => Set<FullTimeEmployee>();
         public DbSet<Department> Departments => Set<Department>();
         public DbSet<Team> Teams => Set<Team>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ManagementDbContext).Assembly);
             base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ManagementDbContext).Assembly);
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
